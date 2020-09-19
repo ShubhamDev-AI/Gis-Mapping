@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+	</head>
+<body>
+</body>
+<title>GIS Based Noise Management Information System of Mumbai City.</title>
+<style>
+
+.header, .content, .menu_nav, .fbg, .footer, form, ol, ol li, ul, .content .mainbar, .content .sidebar {
+	margin:0;
+	padding:0;
+}
+.header {
+}
+.header_resize {
+	margin:0 auto;
+	padding:0;
+	width:100%;
+	}
+.logo {
+	padding-left: 350px;
+	margin-bottom: -5px;
+	float:none;
+	float:left;
+	width:auto;
+	height:65px;
+}
+h1 {
+	margin:0;
+	padding:24px 0 0;
+	font-size:36px;
+	font-weight:bold;
+	line-height:1.2em;
+	text-transform:none;
+}
+h1 a, h1 a:hover {
+	color:#212121;
+	text-decoration:none;
+}
+h1 span {
+}
+h1 small {
+	display:block;
+	font-size:13px;
+	line-height:1.2em;
+	letter-spacing:normal;
+	text-transform:none;
+	color:#d7dcd9;
+}
+.slider {
+	margin:0 0 1px;
+	padding:0;
+	background:none;
+}
+.rss {
+	padding:18px 20px 0 0;
+	float:right;
+	width:auto;
+}
+.rss p {
+	margin:0;
+	padding:0;
+	float:right;
+	width:auto;
+	color:#fff;
+	font-size:13px;
+	line-height:1.5em;
+	font-weight:bold;
+}
+.rss a {
+	color:#fff;
+	text-decoration:none;
+}
+.rss a:hover {
+	text-decoration:underline;
+}
+.rss img {
+	margin:-3px 0 -3px 6px;
+	border:none;
+}
+.menu_nav {
+	
+	padding:0;
+	margin-bottom: -10px;
+	height:41px;
+	background:#157fcc;
+}
+.menu_nav ul {
+	list-style:none;
+	padding:7px ;
+	height:51px;
+	float:left;
+	margin-bottom: -15px;
+}
+.menu_nav ul li {
+	margin:0;
+	padding:0;
+	float:left;
+	border-right:1px solid #fff;
+}
+.menu_nav ul li a {
+	display:block;
+	margin:0;
+	padding:0 24px;
+	font-size:13px;
+	line-height:18px;
+	font-weight:normal;
+	color:black;
+	text-decoration:none;
+	text-transform:none;
+	text-align:center;
+}
+.menu_nav ul li.active a, .menu_nav ul li a:hover {
+	text-decoration:underline;
+	color:black;
+}
+ </style>
+
+	 <!-- Import OpenLayers, reduced, wms read only version -->
+<script src="http://localhost:8080/test/libs/OpenLayers-2.13.1/OpenLayers.js" type="text/javascript"></script>
+<link rel="stylesheet" href="http://localhost:8080/test/libs/OpenLayers-2.13.1/theme/default/style.css" type="text/css">
+<link rel="stylesheet" href="http://localhost:8080/test/libs/OpenLayers-2.13.1/theme/default/style.css" type="text/css" />
+
+<!-- ExtJS -->
+<script type="text/javascript" src="http://localhost:8080/test/libs/ext-4.2.1.883/examples/shared/include-ext.js"></script>
+<script type="text/javascript" src="http://localhost:8080/test/libs/ext-4.2.1.883/examples/shared/options-toolbar.js"></script>
+
+<!-- Shared -->
+<link rel="stylesheet" type="text/css" href="http://localhost:8080/test/libs/ext-4.2.1.883/examples/shared/example.css"/>
+
+
+<script type="text/javascript">
+var popup, vecLayer1, vecLayer2, store1, store2, south, map, style, grid1, mapPanel, st, modifyControl, url1, layer_win, wfs_capab_store, wms_capab_store ;
+Ext.Loader.setConfig({
+    enabled: true,
+    disableCaching: false,
+    paths: {
+        GeoExt: "http://localhost:8080/test/libs/geoext2-2.1.0/src/GeoExt"
+    }
+});
+
+Ext.require([
+   
+    'GeoExt.tree.OverlayLayerContainer',
+    'GeoExt.tree.BaseLayerContainer',
+    'GeoExt.data.LayerTreeModel',
+	 'GeoExt.Action',
+	'GeoExt.data.reader.WfsCapabilities',
+    'GeoExt.data.WfsCapabilitiesLayerStore',
+	'GeoExt.data.WmsCapabilitiesLayerStore',
+   'GeoExt.data.reader.WmsCapabilities',
+   'GeoExt.data.AttributeStore',
+   'GeoExt.data.FeatureStore',
+    'GeoExt.grid.column.Symbolizer',
+    'GeoExt.selection.FeatureModel',
+    'Ext.grid.GridPanel',
+    'Ext.layout.container.Border',
+	'GeoExt.data.proxy.Protocol',
+	'GeoExt.data.reader.Feature',
+	'Ext.data.reader.Json',
+	'GeoExt.Version',
+	'GeoExt.grid.column.Symbolizer',
+	'Ext.data.JsonStore',
+	 'Ext.data.proxy.Ajax',
+      'Ext.data.reader.Json',
+        'Ext.data.writer.Json',
+		'GeoExt.slider.LayerOpacity',
+		'GeoExt.data.reader.WmsCapabilities',
+		'GeoExt.data.WmsCapabilitiesLayerModel',
+		'GeoExt.data.OwsStore',
+		'GeoExt.data.reader.WmsCapabilities',
+		'GeoExt.panel.Legend',
+		'GeoExt.container.LayerLegend',
+		'GeoExt.container.WmsLegend',
+    'GeoExt.container.UrlLegend',
+    'GeoExt.container.VectorLegend',
+]);
+
+   Ext.onReady(function() {
+   	
+   Ext.QuickTips.init();
+
+    	var bounds = new OpenLayers.Bounds(
+                   /*42.1862489922762, 4.75556607519684,
+                    107.4152926679075, 37.0766772569498*/
+					 -180,-90,
+				  180,90
+                );
+		
+		
+		 
+	var  options = {
+				  maxExtent: bounds,
+                    maxResolution:  0.065,
+                    projection: "EPSG:4326",
+					allOverlays: true,
+                    units: 'degrees',
+					center: new OpenLayers.LonLat([79.0882,21.1458]),
+					maxZoom: 22,
+				   minZoom: 4.5,
+					zoom: 11,
+					controls:[ new OpenLayers.Control.Navigation(),
+            new OpenLayers.Control.Attribution(),
+            new OpenLayers.Control.PanPanel(),
+            new OpenLayers.Control.ZoomPanel()]										
+									
+                };
+				
+				
+				map = new OpenLayers.Map('map', options);
+				
+				var ward_boundary = new OpenLayers.Layer.WMS(
+                    "Ward Boundary", "http://localhost:8080/geoserver/wms",
+                    {
+                        LAYERS: 'NMS_Mumbai:ward_boundary',
+                        STYLES: '',
+                        format: 'image/png',
+                       tiled: true,
+						transparent: true
+                    },
+					{
+					displayInLayerSwitcher: true,
+					isBaseLayer: false,
+					transitionEffect: 'resize'
+					}
+                );
+				//mumbai_city
+				var city_boundary = new OpenLayers.Layer.WMS(
+                    "City Boundary", "http://localhost:8080/geoserver/wms",
+                    {
+                        LAYERS: 'NMS_Mumbai:city boundary',
+                        STYLES: '',
+                        format: 'image/png',
+                       tiled: true,
+						transparent: true
+                    },
+					{
+					displayInLayerSwitcher: true,
+					isBaseLayer: false,
+					transitionEffect: 'resize'
+					}
+                );
+				//Mumbai:express_way
+				var express_way = new OpenLayers.Layer.WMS(
+                    "Express Way", "http://localhost:8080/geoserver/wms",
+                    {
+                        LAYERS: 'NMS_Mumbai:expressway',
+                        STYLES: '',
+                        format: 'image/png',
+                       tiled: true,
+						transparent: true
+                    },
+					{
+					displayInLayerSwitcher: true,
+					isBaseLayer: false,
+					transitionEffect: 'resize'
+					}
+                );
+				//Mumbai:major_road
+				var major_road = new OpenLayers.Layer.WMS(
+                    "major road", "http://localhost:8080/geoserver/wms",
+                    {
+                        LAYERS: 'NMS_Mumbai:major road',
+                        STYLES: '',
+                        format: 'image/png',
+                       tiled: true,
+						transparent: true
+                    },
+					{
+					displayInLayerSwitcher: true,
+					isBaseLayer: false,
+					transitionEffect: 'resize'
+					}
+                );
+				
+				//Mumbai:minor_road
+				var minor_road = new OpenLayers.Layer.WMS(
+                    "minor road", "http://localhost:8080/geoserver/wms",
+                    {
+                        LAYERS: 'NMS_Mumbai:minor road',
+                        STYLES: '',
+                        format: 'image/png',
+                       tiled: true,
+						transparent: true
+                    },
+					{
+					displayInLayerSwitcher: true,
+					isBaseLayer: false,
+					transitionEffect: 'resize'
+					}
+                );
+				
+				
+				//Mumbai:railway
+				var railway = new OpenLayers.Layer.WMS(
+                    "railway", "http://localhost:8080/geoserver/wms",
+                    {
+                        LAYERS: 'NMS_Mumbai:railway',
+                        STYLES: '',
+                        format: 'image/png',
+                       tiled: true,
+						transparent: true
+                    },
+					{
+					displayInLayerSwitcher: true,
+					isBaseLayer: false,
+					transitionEffect: 'resize'
+					}
+                );
+				
+				//Mumbai:ward_boundary
+				var highway = new OpenLayers.Layer.WMS(
+                    "National HighWay", "http://localhost:8080/geoserver/wms",
+                    {
+                        LAYERS: 'NMS_Mumbai:national highway',
+                        STYLES: '',
+                        format: 'image/png',
+                       tiled: true,
+						transparent: true
+                    },
+					{
+					displayInLayerSwitcher: true,
+					isBaseLayer: false,
+					transitionEffect: 'resize'
+					}
+                );
+				var noise_data = new OpenLayers.Layer.WMS(
+                    "Noise Data", "http://localhost:8080/geoserver/wms",
+                    {
+                        LAYERS: 'NMS_Mumbai:noise_point',
+                        STYLES: '',
+                        format: 'image/png',
+                       tiled: true,
+						transparent: true
+                    },
+					{
+					displayInLayerSwitcher: true,
+					isBaseLayer: false,
+					transitionEffect: 'resize'
+					}
+                );
+
+                var apikey= "AqpkOitxbnh_CJ3NT5suGaaEPYsCwl3LByiJIMjNDCa2tTN-ZxmpTOKfUk7CjBoK";
+
+				
+				var road = new OpenLayers.Layer.Bing({
+					name: "bing Road",
+				    key: apikey,
+				    type: "Road",
+					restrictedExtent : OpenLayers.Bounds(-20037508, -20037508, 20037508,
+20037508)
+
+				   
+				});
+					var aerial = new OpenLayers.Layer.Bing({
+						name: "bing Aerial",
+					    key: apikey,
+					    type: "Aerial",
+					    maxResolution:76.43702827453613,
+						restrictedExtent : OpenLayers.Bounds(-20037508, -20037508, 20037508,
+20037508)
+
+					});
+									
+									
+				
+
+				var OSM_base = new OpenLayers.Layer.WMS(
+                    "OSM_base", "https://ows.terrestris.de/osm/service?",
+                    {
+                        LAYERS: 'OSM-WMS',                                             
+                    },
+					{ isBaseLayer: false}
+                );
+				
+			map.addLayers([OSM_base,road,aerial,city_boundary,ward_boundary,major_road,minor_road,railway,noise_data,highway,express_way]);
+				
+			//map.addControl(new OpenLayers.Control.Scale($('scale')));
+           //   map.addControl(new OpenLayers.Control.MousePosition());
+		   
+			  
+				map.addControl(
+                new OpenLayers.Control.MousePosition({
+                    prefix:'Longitude|Lattitude</a> coordinates: ',
+                    separator: ' | ',
+                    numDigits: 2,
+                    emptyString: 'Mouse is not over map.'
+					//displayProjection: new OpenLayers.Projection("EPSG:4326")
+                }),
+			//	new OpenLayers.Control.PanZoomBar()
+
+				//new OpenLayers.Control.OverviewMap()
+            );
+			
+            
+			map.zoomToExtent(new OpenLayers.Bounds(
+              65.9512481689453, 5.96124982833862,
+                    101.048751831055, 39.0387496948242
+                ));
+			
+			
+			
+			
+
+			//pan map
+			
+			var pan = Ext.create('GeoExt.Action',{
+		         tooltip: "Pan Map",
+           // iconCls: "icon-pan",
+			text: "Pan Map",
+			icon:"http://localhost:8080/test/img/handcursor.png",
+            enableToggle: true,
+            pressed: false,
+            allowDepress: true,
+            control: new OpenLayers.Control.Navigation(),
+            map: map,
+            toggleGroup: 'tools'
+                });
+				
+			var pan_map = Ext.create('Ext.Button', pan);
+			
+			var zoomin = Ext.create('Ext.Button',{
+                handler: function(){
+                    map.zoomIn();
+                },
+                tooltip: "Zoom In",
+                icon: "http://localhost:8080/test/img/magnifier_zoom_in.png",
+				text: "Zoom In",
+              
+            });
+
+			
+			//zoom out
+         var zoomout = Ext.create('Ext.Button',{
+                handler: function(){
+                    map.zoomOut();
+                },
+                tooltip: "Zoom In",
+               icon: "http://localhost:8080/test/img/magnifier_zoom_out.png",
+				text: "Zoom Out"
+				
+            });
+			
+			var zoomex = Ext.create('GeoExt.Action',{
+                   icon:"http://localhost:8080/test/img/arrow_out.png",
+                    control: new OpenLayers.Control.ZoomToMaxExtent(),
+                    map: map,
+                    text: "max extent",
+                    tooltip: "zoom to full extent",
+                    pressed: false,
+                    allowDepress: false,
+                });
+				var zoom_ex = Ext.create('Ext.Button', zoomex);
+				
+		// rectangle zoom		
+				var zoomrec = Ext.create('GeoExt.Action',{
+		             icon:"http://localhost:8080/test/img/drag-rectangle-off.png",
+					text: "Zoom Rectangle",
+					control: new OpenLayers.Control.ZoomBox(),
+					map: map,
+					toggleGroup: 'tools',  
+                    allowDepress: true,
+                    pressed: false,
+					enableToggle: true,
+            
+            //allowDepress: false,
+                    tooltip: "zoom"
+                });
+			var zoom_rec = Ext.create('Ext.Button', zoomrec);
+			
+			// previous and next zoom		
+		var historyControl = new OpenLayers.Control.NavigationHistory();
+        map.addControl(historyControl);
+		
+		var navPreviousAction = Ext.create('GeoExt.Action',{
+            tooltip: "Zoom to Previous Extent",
+            icon:"http://localhost:8080/test/img/arrow_left.png",
+			text:"zoom prev",
+            disabled: true,
+			enableToggle: true,
+            pressed: false,
+            allowDepress: false,
+            control: historyControl.previous,
+			toggleGroup: 'tools'
+        });
+        var nav_prev = Ext.create('Ext.Button', navPreviousAction);
+		
+        var navNextAction = Ext.create('GeoExt.Action',{
+            tooltip: "Zoom to Next Extent",
+            icon:"http://localhost:8080/test/img/arrow_right.png",
+			text:"zoom next",
+            disabled: true,
+			enableToggle: true,
+            pressed: false,
+            allowDepress: false,
+            control: historyControl.next,
+			toggleGroup: 'tools'
+        });
+
+		var nav_nxt = Ext.create('Ext.Button', navNextAction);
+		
+		//measure length
+		 var measure_len = Ext.create('GeoExt.Action',{
+                   icon:"http://localhost:8080/test/img/ruler.png",
+                    text: "Measure Length",
+                   control: new OpenLayers.Control.Measure(OpenLayers.Handler.Path, {
+                        geodesic: true,
+                        eventListeners: {
+                            measure: function(event) {
+                              if (event.order == 1) {
+                                var win = new Ext.Window({
+                                    title: "Measure Results",
+                                    modal: true,
+                                    width: 180,
+                                    constrain: true,
+                                    bodyStyle: {padding: 10},
+                                    html: event.measure.toFixed(3) + " " + event.units
+                                });
+                                win.show();}
+								else{
+                                var win = new Ext.Window({
+                                    title: "Measure Results",
+                                    modal: true,
+                                    width: 180,
+                                    constrain: true,
+                                    bodyStyle: {padding: 10},
+                                    html: event.measure.toFixed(3) + " " + event.units + "<sup>2</" + "sup>"
+                                });
+                                win.show();}
+                            }
+                        }
+                    }),
+                    map: map,
+                    // button options
+                    toggleGroup: 'tools',  // only one tool can be active in a group
+                    allowDepress: true,
+                    tooltip: "measure distance"
+                });
+		
+var m_len = Ext.create('Ext.Button', measure_len);
+		
+			// measure area	
+	var measure_area = Ext.create('GeoExt.Action',{
+	               icon:"http://localhost:8080/test/img/ruler_square.png",
+                    text: "Measure Area",
+                   control: new OpenLayers.Control.Measure(OpenLayers.Handler.Polygon, {
+                        geodesic: true,
+                        eventListeners: {
+                            measure: function(event) {
+							if (event.order == 1) {
+                                var win = new Ext.Window({
+                                    title: "Measure Results",
+                                    modal: true,
+                                    width: 180,
+                                    constrain: true,
+                                    bodyStyle: {padding: 10},
+                                    html: event.measure.toFixed(3) + " " + event.units
+                                });
+                                win.show();}
+								else{
+                                var win = new Ext.Window({
+                                    title: "Measure Results",
+                                    modal: true,
+                                    width: 180,
+                                    constrain: true,
+                                    bodyStyle: {padding: 10},
+                                    html: event.measure.toFixed(3) + " " + event.units + "<sup>2</" + "sup>"
+                                });
+                                win.show();}
+                            }
+                        }
+                    }),
+                    map: map,
+                    // button options
+                    toggleGroup: 'tools',  // only one tool can be active in a group
+                    allowDepress: true,
+                    tooltip: "measure area"
+                });
+	var m_area = Ext.create('Ext.Button', measure_area);
+	
+	//get feature info			 
+		var info = Ext.create('GeoExt.Action',{
+            tooltip: "Feature Info",
+			icon:"http://localhost:8080/test/img/information.png",
+		text: "GetInfo",
+           
+            enableToggle: true,
+            allowDepress: true,
+            control: new OpenLayers.Control.WMSGetFeatureInfo({
+          url: "http://localhost:8080/geoserver/wms",
+           title: 'Identify features by clicking',
+            queryVisible: true,
+            eventListeners: {
+                getfeatureinfo: function(event) {
+				
+				if(popup) {map.removePopup(popup);}
+				
+                        popup = new OpenLayers.Popup.FramedCloud(
+                        "chicken", 
+                        map.getLonLatFromPixel(event.xy),
+                        null,
+                        event.text,
+                        null,
+                        true
+                    );
+					
+					map.addPopup(popup);
+                }
+            }
+}),
+            map: map,
+            toggleGroup: 'tools'
+        });
+		
+		var get_info = Ext.create('Ext.Button', info);
+		
+			var clear_selection =  Ext.create('Ext.Button',{
+                tooltip: "Clear Selection",
+				text: "Clear",
+				//icon: "http://localhost:8080/test/tools_png/delete.png",
+                handler: function(){
+                   
+					if(popup){popup.destroy();}
+					
+					if(vecLayer1){vecLayer1.destroyFeatures();}
+					if (layer_win){layer_win.destroy();}
+					grid1.destroy();
+					south.collapse();
+					query_panel.getForm().reset();
+				
+							
+                }
+               
+            });
+            
+
+  mapPanel = Ext.create('GeoExt.panel.Map', {
+           // title: 'Mappanel',
+            map: map,
+			region: 'center',
+			stateful: true,
+           // stateId: 'mappanel',
+		   tbar: [pan_map, zoomin, zoomout, zoom_ex, zoom_rec, nav_prev, nav_nxt, m_len, m_area, get_info, clear_selection],
+            dockedItems: [{
+                xtype: 'toolbar',
+                dock: 'top',
+                items: []
+            }]
+        });			
+		
+		
+		 wfs_capab_store = Ext.create('GeoExt.data.WFSCapabilitiesStore',{
+       url: "http://localhost:8080/geoserver/wfs?service=wfs&version=1.0.0&request=getCapabilities",
+		//url:"http://localhost:8080/geoserver/wfs?service=wfs&version=1.1.0&request=GetCapabilities",
+		autoLoad: true,
+		 layerOptions: function() {
+            return {
+                visibility: false,
+                displayInLayerSwitcher: false,
+                strategies: [new OpenLayers.Strategy.BBOX({ratio: 1})]
+            };
+        }
+        // set as a function that returns a hash of layer options.  This allows
+        // to have new objects created upon each new OpenLayers.Layer.Vector
+        // object creations.
+        
+    });
+	wfs_capab_store.load();
+	
+	
+ 
+  wms_capab_store = Ext.create('GeoExt.data.WMSCapabilitiesStore',{
+        url: "http://localhost:8080/geoserver/wms?request=getCapabilities",
+		autoLoad: true
+    });
+		//wms_capab_store1.load();
+		
+		
+		var menuC = Ext.create('Ext.menu.Menu', {
+        //     id: 'contextmenu',
+			// itemId: 'contextmenu',
+			// xtype: "menu",
+            items: [{
+                text: "Zoom to Layer Extent",
+               // icon: '../images/arrow_out.png',
+                handler: function () {
+				    var snode = tree.getSelectionModel().getSelection();
+					var layer1 = snode[0].get('text');
+							var wms_store = Ext.create('GeoExt.data.WMSCapabilitiesStore',{
+        url: "http://localhost:8080/geoserver/wms?request=getCapabilities",
+		autoLoad: true,
+	    listeners : {
+        load : function(store) {
+           	var index = store.findExact( 'title', snode[0].get('text'));
+			//alert(index);
+			var rec = store.getAt(index);
+	    	var extent = rec.get("llbbox");
+	        
+                        map.zoomToExtent(new OpenLayers.Bounds(extent));
+					//	alert(snode.layer.maxExtent);
+                    
+	        }
+    }
+    });
+	
+	 },
+	 scope: this
+            },
+	{
+		 text: 'Remove Layer',
+            handler: function(){
+			
+			var snode = tree.getSelectionModel().getSelection();
+					var layer = snode[0].get('layer');
+			//var sel_node_index = sel_node.indexOf(0);
+			//alert(sel_node.layer);
+			mapPanel.map.removeLayer(layer);
+			//alert(sel_node.layer);
+			  
+		 }
+		 }
+		            ]
+        });
+		
+		
+		
+	
+var store = Ext.create('Ext.data.TreeStore', {
+            model: 'GeoExt.data.LayerTreeModel',
+            root: {
+                expanded: true,
+                children: [
+                   	{
+                        plugins: ['gx_overlaylayercontainer'],
+                        expanded: true
+                    }, 
+					{
+                        plugins: ['gx_baselayercontainer'],
+                        expanded: true,
+                        text: "Base Maps"
+                    }
+                ]
+            }
+        });
+      //  var layer;
+		  var tree = Ext.create('GeoExt.tree.Panel', {
+            border: true,
+            region: "west",
+            title: "Layers",
+            width: 250,
+            split: true,
+            collapsible: true,
+           // collapseMode: "mini",
+            autoScroll: true,
+            store: store,
+            rootVisible: false,
+            lines: false,
+			 viewConfig: {
+			  plugins: [{
+                    ptype: 'treeviewdragdrop',
+                    appendOnly: false
+                }],
+            listeners: {
+                itemcontextmenu: function(view, rec, node, index, event) {
+                    event.stopEvent(); // stops the default event. i.e. Windows Context Menu
+                    menuC.showAt(event.getXY()); // show context menu where user right clicked
+                    return false;
+                }
+            }
+        },
+			 tbar: [{
+            text: 'Available Layers',
+
+            handler: function(){
+					
+		   var wms_grid = Ext.create('Ext.grid.GridPanel', {
+      //  title: "WMS Capabilities",
+       store: wms_capab_store,
+	   id: "wms_grid",
+	  // selType: 'cellmodel',
+        columns: [
+            {header: "Title", dataIndex: "title", sortable: true},
+            {header: "Name", dataIndex: "name", sortable: true},
+            {header: "Queryable", dataIndex: "queryable", sortable: true, width: 70},
+            {id: "description", header: "Description", dataIndex: "abstract"}
+        ],
+	
+		
+    viewConfig: {
+       getRowClass: function(record, index) {
+      
+        //       }
+            
+        }
+    },
+        autoExpandColumn: "description",
+       // renderTo: "capgrid",
+        height: 300,
+        width: 650,
+		selType: 'rowmodel',
+		//sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
+		 buttons: [{
+            text: 'Add to Map',
+            handler: function(){
+			var record = wms_grid.getSelectionModel().getSelection();
+			var layer_name = record[0].get('name');
+			var layer_title = record[0].get('title');
+			//alert(layer_name);
+			//alert(layer_title);
+			
+				var layer = new OpenLayers.Layer.WMS(
+                    layer_title, "http://localhost:8080/geoserver/wms",
+                    {
+                        LAYERS: layer_name,
+                        STYLES: '',
+                        format: 'image/png',
+						tiled: true,
+						transparent: true
+                      //  tilesOrigin : map.maxExtent.left + ',' + map.maxExtent.bottom
+                    },
+					{
+				//	tileOptions: {maxGetUrlLength: 2048},
+					displayInLayerSwitcher: true,
+					isBaseLayer: false,
+					//singleTile: true,
+					transitionEffect: 'resize'
+					}
+                );
+			//var layer = record.getLayer().clone();
+			map.addLayer(layer);
+			map.zoomToExtent(new OpenLayers.Bounds(record[0].get("llbbox")));
+			//alert(layer11);
+					
+			
+			}
+			}]
+    });
+			
+			if(layer_win)
+	{layer_win.destroy();}
+	
+	layer_win=Ext.create('Ext.Window',{
+        title: "Layers Library",
+		       // renderTo: 'container',
+		//region: 'north',
+       // width:800,
+       // height:250,
+		items: wms_grid,
+        layout:'fit'
+	  
+	   
+    }); 
+	layer_win.show();
+               
+			  
+		 }
+         }],
+		 
+		 bbar: [{
+		 text: 'Remove Layer',
+            handler: function(){
+			
+			var sel_node = tree.getSelectionModel().getSelection();
+			//alert(sel_node);
+			var layer = sel_node[0].get('layer');
+			//alert(layer);
+			//var sel_node_index = sel_node.indexOf(0);
+			//alert(sel_node.layer);
+			mapPanel.map.removeLayer(layer);
+			//alert(sel_node.layer);
+			           
+			  
+		 }
+		 }
+		 
+		 ]
+
+			
+			
+        });
+		
+		
+		var legend_panel = Ext.create('GeoExt.panel.Legend', {
+		   // border: false,
+            region: "west",
+            title: "Legend",
+			defaults: {
+            labelCls: 'mylabel',
+            style: 'padding:5px'
+        },
+            width: 250,
+			//height: 300,
+            split: true,
+            collapsible: true,
+           // collapseMode: "mini",
+            autoScroll: true,
+			rootVisible: false,
+            lines: false,
+			//layerStore: layer_store,
+            //store: store,
+           // rootVisible: false,
+           // lines: false,
+		});
+		
+
+
+		
+		
+		//edit data 
+		
+		 var editing_layer_combo = Ext.create('Ext.form.ComboBox', {
+	region: 'east',
+        store: wfs_capab_store,
+		fieldLabel: 'Layer',
+		 //renderTo:'container',
+        displayField:'title',
+		valueField: 'name',
+        typeAhead: true,
+        mode: 'local',
+        forceSelection: true,
+        triggerAction: 'all',
+        emptyText:'Select_Layer',
+        selectOnFocus:true,
+		listeners: { 
+               select: function(combo, records) {
+                  z = combo.getValue();
+			
+				  
+				     var attribute_store1 = Ext.create('GeoExt.data.AttributeStore', {
+       url: "http://localhost:8080/geoserver/wfs?service=WFS&request=DescribeFeatureType&version=1.1.0&typeName="+z,
+	   autoLoad: true,
+	                 });
+  editing_attribute_combo.bindStore(attribute_store1);
+				  }
+        }
+        
+    });
+	
+	  var editing_attribute_combo = Ext.create('Ext.form.ComboBox', {
+	region: 'east',
+    //  store: attribute_store,
+		fieldLabel: 'attribute',
+		 //renderTo:'container',
+        displayField:'name',
+		hidden: true,
+		valueField:'name',
+		//disabled: true,
+        typeAhead: true,
+        mode: 'local',
+        forceSelection: true,
+        triggerAction: 'all',
+        emptyText:'Select_Layer',
+        selectOnFocus:true,		
+		listeners: { 
+               select: function(combo, record, index) {
+                  
+				  },
+				  expand: function(combo, record, index) {
+               		combo.getStore().filter([
+				
+				{
+    fn   : function(record) {
+      return record.get('name') != 'the_geom' && record.get('name') != 'geom'
+    },
+    scope: this
+  }
+]);
+				  }
+        }
+        
+    });
+		
+		 var editing_panel = Ext.create('Ext.form.FormPanel', {
+        title: 'Edit Layers',
+        frame: true,
+		//border: true,
+		autoScroll: true,
+            border: false,
+			//split: true,
+            autoScroll: true,
+			collapsible: true,
+        //labelWidth: 110,
+     //  width: 320,
+		region:'east',
+        //renderTo:'form-ct',
+       // bodyStyle: 'padding:0 10px 0;',
+        items: [
+           editing_layer_combo, editing_attribute_combo
+			
+        ],
+        buttons: [{
+            text: 'Query',
+            handler: function(){
+               if(editing_panel.getForm().isValid())
+			   {
+			    	
+					var layer_value = editing_panel.getComponent(editing_layer_combo).getValue();
+				// alert(layer_value);
+					
+						
+			//	alert(layer);
+				var index_layer_value = editing_panel.getComponent(editing_layer_combo).getStore().findExact('name', layer_value);
+				//alert(kk3);
+				var record_layer_value = editing_panel.getComponent(editing_layer_combo).getStore().getRange()[index_layer_value];
+				//alert(kk4);
+				var namespace_value = record_layer_value.get('namespace');
+				//alert (namespace_value);
+				
+					
+	var no_fields = editing_panel.getComponent(editing_attribute_combo).getStore().getCount();
+					//	alert(no_fields);
+						k = no_fields - 1;
+						var field_name = new Array();
+						var field_type = new Array();
+						for (i = 0; i <= k; i++){
+					  var tttt = editing_panel.getComponent(editing_attribute_combo).getStore().getRange()[i];
+				  field_name[i] = tttt.get("name");
+				  field_type[i] = tttt.get("type");
+				
+				  
+				  }
+				  // function define editing
+				 editing(field_name,no_fields,field_type,layer_value,namespace_value);
+        }
+		 }
+       
+        }]
+    });
+		
+		
+		var north = Ext.create('Ext.panel.Panel', {
+			    
+				html: '<div class="header">  <div class="logo"> <h1><a href="index.jsp"><span>GIS Based Noise Management Information System of Mumbai City</span></a></h1> </div> <div class="searchform"> <form id="formsearch" name="formsearch" method="post" action="#"> <input name="button_search" src="IndianFlag.gif" class="button_search" type="image" /></form> </div> <div class="clr"></div> <div class="menu_nav"> <ul> <li><a href="PrivateIndex.jsp"><span>Home Page</span></a></li> <li class="active"><a href="PrivateGeoserver.jsp"><span>Layer</span></a></li> <li><a href="PrivateReport.jsp"><span>Report</span></a></li> <li ><a href="PrivateContact.jsp"><span>Contact Us</span></a></li> <li><a href="Logout.jsp"><span>Logout</span></a></li> </ul> </div> </div> </div>',
+				autoHeight: true,
+				border: false,
+				
+         	    region: 'north',
+		        });
+	 
+	 south = Ext.create('Ext.panel.Panel', {
+        title: "Feature Atributes",
+		border: false,
+			split: true,
+			frame: true,
+            autoScroll: true,
+       // layout: 'border',
+          layout: "fit",
+		 collapsed: true,
+		  region: 'south',
+        height: 180,
+      //  width: 250,
+		// frame: true,
+		autoScroll: true,
+            border: false,
+			split: true,
+            collapsible: true
+        //labelWidth: 110,
+      //  items: [tree, legend]
+	  
+    });
+	
+	var west = Ext.create('Ext.Panel', {
+        title: "Layers",
+       // layout: 'border',
+         // layout: "fit",
+		 collapsed: false,
+		 collapsible: true,
+          region: 'west',
+     //   height: 180,
+      //  width: 250,
+		// frame: true,
+		autoScroll: true,
+            border: false,
+			split: true,
+            //labelWidth: 110,
+       items: [tree, legend_panel]
+    });
+	
+	var query_editing = Ext.create('Ext.Panel', {
+        title: "Feature Query",
+       // layout: 'border',
+         // layout: "fit",
+		 collapsed: false,
+		 collapsible: true,
+          region: 'east',
+     //   height: 180,
+      //  width: 250,
+		 frame: true,
+		autoScroll: true,
+            border: false,
+			split: true,
+            //labelWidth: 110,
+       items: [editing_panel]
+    });
+	
+var viewport = Ext.create('Ext.Viewport', {
+            layout: "fit",
+            hideBorders: true,
+            items: {
+                layout: "border",
+                deferredRender: false,
+                items: [mapPanel, north, west, query_editing, south]
+            }
+        });
+		
+		 style = new OpenLayers.StyleMap({
+                "default": new OpenLayers.Style(null, {
+                    rules: [new OpenLayers.Rule({
+                        symbolizer: {
+                            "Point": {
+                                pointRadius: 4,
+                               graphicName: "square",
+                               fillColor: "blue",
+                                fillOpacity: 0.5,
+                                strokeWidth: 1,
+                                strokeOpacity: 1,
+                                strokeColor: "#333333"
+                            },
+                            "Line": {
+                                strokeWidth: 2,
+                                strokeOpacity: 1,
+                                strokeColor: "#ff9933"
+                            },
+                            "Polygon": {
+                                strokeWidth: 3,
+                                strokeOpacity: 1,
+                                strokeColor: "#ff6633",
+                                fillColor: "blue",
+                                fillOpacity: 0
+                            }
+                        }
+                    })]
+                })
+            });
+
+	
+});
+
+
+
+
+
+
+function editing(field_name,no_fields,field_type,layer_value,namespace_value)
+{
+
+fields_name1 = field_name;
+
+fields_no1 = no_fields;
+fields_type1 = field_type;	
+		
+	
+
+layer_name1 = layer_value;
+namspace_name1 = namespace_value;
+if (vecLayer1)
+{
+map.removeLayer(vecLayer1);
+
+}
+if (grid1)
+{
+grid1.destroy();
+
+}
+vecLayer1 = new OpenLayers.Layer.Vector("vector",{displayInLayerSwitcher: false, styleMap: style});
+map.addLayers([vecLayer1]);
+
+columns1 = [];
+keys1 = [];
+
+columns2 = [];
+keys2 = [];
+for (i = 0; i<= fields_no1-1; i++)
+{
+
+if (fields_type1[i] == "xsd:int" || fields_type1[i] == "xsd:short" || fields_type1[i] == "xsd:long"){var type1 = 'int';var type2 = 'numberfield';}
+else if (fields_type1[i] == "xsd:string" || fields_type1[i] == "xsd:dateTime"){var type1 = 'string';var type2 = 'textfield';}
+else if (fields_type1[i] == "xsd:double" || fields_type1[i] == "xsd:decimal"){var type1 = 'float';var type2 = 'numberfield';}
+else if (fields_type1[i] == "gml:PointPropertyType") {var shape = 'point';}
+else if (fields_type1[i] == "gml:MultiPointPropertyType") {var shape = 'multipoint';}
+else if (fields_type1[i] == "gml:MultiLineStringPropertyType") {var shape = 'line';}
+else if (fields_type1[i] == "gml:MultiSurfacePropertyType" || fields_type1[i] == "gml:MultiPolygonPropertyType") {var shape = 'polygon';}
+
+else {var type1 = "string";var type2 = 'textfield';}
+
+if(fields_name1[i]!= "geom" && fields_name1[i]!= "the_geom")
+{
+keys1.push({
+                name: fields_name1[i],
+                type: type1
+            });
+
+columns1.push({
+                header: fields_name1[i],
+                dataIndex: fields_name1[i],
+				editor: {xtype: type2, allowBlank: true}
+            });
+			
+		
+
+}
+}
+	
+ store1 = Ext.create('GeoExt.data.FeatureStore', {
+ storeId: "store1",
+       //layer: vecLayer1,
+        fields: keys1,
+        proxy: Ext.create('GeoExt.data.proxy.Protocol',{
+            protocol: new OpenLayers.Protocol.WFS.v1_1_0({
+               url: "http://localhost:8080/geoserver/wfs",
+
+			    version: "1.0.0",
+               featureType: layer_name1,
+               featureNS: namspace_name1,
+			  srsName: "EPSG:4326",
+			    geometryName: "the_geom",
+                //outputFormat: "JSON"
+			  /* filter: new OpenLayers.Filter.Comparison({
+                type: OpenLayers.Filter.Comparison.LIKE,
+                property: "DISTRICT",
+                value: 'A*'
+            }),*/
+            }),
+			 
+			reader: Ext.create('GeoExt.data.reader.Feature')
+			
+        }),
+		
+        autoLoad: true
+		//autoDestroy: true
+		
+    });
+
+ //store1.load();
+//alert(store1.getCount());
+		store1.bind(vecLayer1);
+
+		
+		store1.on("load", function() {
+		mapPanel.map.zoomToExtent(vecLayer1.getDataExtent())
+	
+		});
+		
+	
+	 modifyControl = new OpenLayers.Control.ModifyFeature(
+    vecLayer1, {autoActivate: true}
+);
+
+if (shape == "polygon")
+{
+ var drawControl = new OpenLayers.Control.DrawFeature(
+    vecLayer1,
+    OpenLayers.Handler.Polygon,
+    {handlerOptions: {multi: true}});
+}
+
+
+else if (shape == "line")
+{
+ var drawControl = new OpenLayers.Control.DrawFeature(
+    vecLayer1,
+    OpenLayers.Handler.Path,
+    {handlerOptions: {multi: true}});
+}
+
+else if (shape == "point")
+{
+ var drawControl = new OpenLayers.Control.DrawFeature(
+    vecLayer1,
+    OpenLayers.Handler.Point,
+    {handlerOptions: {multi: false}});
+}
+
+else if (shape == "multipoint")
+{
+ var drawControl = new OpenLayers.Control.DrawFeature(
+    vecLayer1,
+    OpenLayers.Handler.Point,
+    {handlerOptions: {multi: true}});
+}
+
+
+
+map.addControls([modifyControl,drawControl]);
+
+var draw = Ext.create('GeoExt.Action',{
+        control: drawControl,
+        text: "Create",
+        enableToggle: true
+    })
+
+var draw_but = Ext.create('Ext.Button', draw);
+
+var modify = Ext.create('GeoExt.Action',{
+        control: modifyControl,
+        text: "Modify",
+        enableToggle: true
+    })
+
+var modify_but = Ext.create('Ext.Button', modify);
+
+grid1 = Ext.create('Ext.grid.GridPanel', {
+	
+	id: "grid1",
+	editable: true,
+	
+	store: store1,
+	loadMask: true,
+	//collapsible: true,
+	columns: columns1,
+	selType: 'featuremodel',
+	 
+
+    plugins: [
+        Ext.create('Ext.grid.plugin.CellEditing', {
+            clicksToEdit: 2
+        })
+    ],
+		bbar:[{
+        text: "Delete",
+        handler: function() {
+    grid1.store.featureFilter = new OpenLayers.Filter({
+        evaluate: function(feature) {
+	
+            return feature.state != OpenLayers.State.DELETE;
+        }
+    });
+	
+	
+	
+	var record = grid1.getSelectionModel().getSelection();
+			var id = record[0].get('id');
+			//alert(id);
+			var feat = vecLayer1.getFeatureById(id);
+			vecLayer1.removeFeatures([feat]);
+        if (feat.state != OpenLayers.State.INSERT) {
+            feat.state = OpenLayers.State.DELETE;
+            vecLayer1.addFeatures([feat]);
+        }
+	
+}
+    }, draw_but, modify_but, {
+    text: "Save",
+    handler: function() {
+	
+        grid1.store.proxy.protocol.commit(
+            vecLayer1.features, {
+                callback: function() {
+                    var layers = mapPanel.map.layers;
+                    for (var i=layers.length-1; i>=0; --i) {
+                        layers[i].redraw(true);
+                    }
+                    grid1.store.reload();
+                }
+        });
+    }
+}
+]
+	
+
+});
+	
+	south.add(grid1);
+south.doLayout(true);
+
+south.expand(false); 
+
+
+var sm = grid1.getSelectionModel();
+  
+}
+
+
+
+
+</script>
+</html>
